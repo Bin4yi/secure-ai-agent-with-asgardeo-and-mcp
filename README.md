@@ -56,18 +56,25 @@ This project demonstrates how to create a secured MCP (Model Context Protocol) s
 
 ### 1. Create an Asgardeo Application
 
-1. Login to your Asgardeo account.
-2. Navigate to the Applications Tab and selct the **MCP Client Application** as shown in below image.
-![mcp-client-app-selection.png](images/mcp-client-app-selection.png)
+## Asgardeo Configuration
 
-3. Add your application name and callback URL
-![mcp-client-creation.png](images/mcp-client-creation.png)
+### 1. Create an Asgardeo Application
+
+1. Login to your [Asgardeo](https://asgardeo.io/) account.
+2. Navigate to the **Applications** tab and select the **MCP Client Application**.
+   ![mcp-client-app-selection.png](images/mcp-client-app-selection.png)
+4. Add your application name and callback URL.
+   ![mcp-client-creation.png](images/mcp-client-creation.png)
 
 ### 2. Get Your Application Credentials
 
-Once the application is created get both the **Client ID** and **Tenant Name**:
-- **Client ID**: Found in the application's **Protocol** tab
-- **Tenant Name**: Your organization's tenant name (visible in the URL)
+Once the application is created, get both the **Client ID** and **Tenant Name**:
+
+* **Client ID**: Found in the application's **Protocol** tab.
+* **Tenant Name**: Your organization's tenant name (visible in the URL).
+
+
+
 
 ### 3. Configure the Application
 
@@ -126,3 +133,4 @@ For more information on how to run MCP Inspector, refer to the [MCP Inspector do
   - `city` (optional): City name (defaults to "London")
 - **Authentication**: Required (valid JWT token)
 - **Returns**: Weather information including temperature, condition, and humidity
+
