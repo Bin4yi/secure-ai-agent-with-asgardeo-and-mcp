@@ -1,21 +1,34 @@
-# MCP Auth Python Quick Start Guide - Asgardeo Integration
+# Pawsome Pet Care - AI-Powered Veterinary Assistant with Asgardeo Authentication
 
-This project demonstrates how to create a secured MCP (Model Context Protocol) server in Python with FastMCP framework, using Asgardeo as the OAuth2/OIDC provider.
+This project demonstrates a sophisticated AI-powered pet care chatbot system that integrates a secured MCP (Model Context Protocol) server with an intelligent LangGraph agent, using **Asgardeo** as the OAuth2/OIDC provider for authentication and authorization.
+
+## 🌟 Key Features
+
+- **Secure MCP Server** with Asgardeo OAuth2 authentication
+- **Intelligent LangGraph Agent** with dynamic context management
+- **Multi-Pet Context Handling** with automatic pet selection logic
+- **JWT Token Validation** with JWKS endpoint integration
+- **OpenAI Integration** for AI-powered pet name suggestions
+- **RESTful Web Interface** with CORS support
+- **Real-time Chat** with conversation memory
 
 ## Prerequisites
 
 - Python 3.12 or higher
-- Asgardeo account and application setup
+- **Asgardeo account** and application setup
+- OpenAI API key (for pet name suggestions)
 - pip (Python package installer)
 
 ## Project Structure
 
 ```
-├── main.py              # Main FastMCP server application
-├── jwt_validator.py     # JWT validation module
-├── .env                 # Environment variables configuration
-├── README.md           # This file
-└── requirements.txt    # Python dependencies
+├── main.py              # FastMCP server with secured endpoints
+├── agent.py            # LangGraph agent with dynamic context logic
+├── jwt_validator.py    # JWT validation module for Asgardeo tokens
+├── index.html          # Web interface for chat
+├── .env                # Environment variables configuration
+├── requirements.txt    # Python dependencies
+└── README.md          # This file
 ```
 
 ## Installation
@@ -33,104 +46,327 @@ This project demonstrates how to create a secured MCP (Model Context Protocol) s
    pip install -r requirements.txt
    ```
 
+   Key dependencies include:
+   - `fastmcp` - Fast MCP server framework
+   - `python-dotenv` - Environment variable management
+   - `openai` - OpenAI API integration
+   - `pyjwt` - JWT token handling
+   - `langgraph` - Agent orchestration
+   - `langchain-openai` - OpenAI LangChain integration
+   - `aiohttp` - Async HTTP server
+   - `httpx` - HTTP client
+
 4. **Configure environment variables**
    
-   Create a `.env` file in the project root directory with your Asgardeo configuration:
+   Create a `.env` file in the project root directory:
    
    ```bash
    # Asgardeo OAuth2 Configuration
-   AUTH_ISSUER=https://api.asgardeo.io/t/<your-tenant>/oauth2/token
-   CLIENT_ID=<your-client-id>
-   JWKS_URL=https://api.asgardeo.io/t/<your-tenant>/oauth2/jwks
-   ```
-   
-   **Example with actual values:**
-   ```bash
-   # Asgardeo OAuth2 Configuration
-   AUTH_ISSUER=https://api.asgardeo.io/t/mycompany/oauth2/token
-   CLIENT_ID=abc123xyz789_client_id_from_asgardeo
-   JWKS_URL=https://api.asgardeo.io/t/mycompany/oauth2/jwks
-   ```
 
-## Asgardeo Configuration
+   ## Asgardeo Configuration
 
-### 1. Create an Asgardeo Application
+   ## 1. Create an Asgardeo Application
 
-## Asgardeo Configuration
+      1. Login to your [Asgardeo](https://asgardeo.io/) account.
+      2. Navigate to the **Applications** tab and select the **MCP Client Application**.
+      3. Add your application name and callback URL.
 
-### 1. Create an Asgardeo Application
-
-1. Login to your [Asgardeo](https://asgardeo.io/) account.
-2. Navigate to the **Applications** tab and select the **MCP Client Application**.
-   ![mcp-client-app-selection.png](images/mcp-client-app-selection.png)
-4. Add your application name and callback URL.
-   ![mcp-client-creation.png](images/mcp-client-creation.png)
-
-### 2. Get Your Application Credentials
+   ## 2. Get Your Application Credentials
 
 Once the application is created, get both the **Client ID** and **Tenant Name**:
 
 * **Client ID**: Found in the application's **Protocol** tab.
 * **Tenant Name**: Your organization's tenant name (visible in the URL).
+   AUTH_ISSUER=https://api.asgardeo.io/t/<your-tenant>
+   CLIENT_ID=<your-client-id>
+   JWKS_URL=https://api.asgardeo.io/t/<your-tenant>/oauth2/jwks
+   
+   # OpenAI Configuration
+   OPENAI_API_KEY=<your-openai-api-key>
+   ```
+   
+   **Example with actual values:**
+   ```bash
+   # Asgardeo OAuth2 Configuration
+   AUTH_ISSUER=https://api.asgardeo.io/t/pawsomepets
+   CLIENT_ID=abc123xyz789_client_id_from_asgardeo
+   JWKS_URL=https://api.asgardeo.io/t/pawsomepets/oauth2/jwks
+   
+   # OpenAI Configuration
+   OPENAI_API_KEY=sk-proj-abc123xyz789
+   ```
 
+## 🔐 Asgardeo Configuration
 
+### 1. Create an MCP Client Application in Asgardeo
 
+1. Login to your **Asgardeo** account at [https://console.asgardeo.io](https://console.asgardeo.io)
+2. Navigate to the **Applications** tab and select **MCP Client Application** template
 
-### 3. Configure the Application
+   ![MCP Client App Selection](images/mcp-client-app-selection.png)
 
-The application now uses environment variables for configuration. Make sure you have created the `.env` file as described in the Installation section above.
+3. Configure your application:
+   - **Application Name**: Pawsome Pet Care MCP
+   - **Authorized Redirect URLs**: Add the callback URL for your client application
+     - For MCP Inspector: `http://localhost:6274/oauth/callback`
+     - For the agent: `http://localhost:8080/callback`
+
+   ![MCP Client Creation](images/mcp-client-creation.png)
+
+### 2. Get Your Application Credentials
+
+Once the application is created, retrieve the following:
+- **Client ID**: Found in the application's **Protocol** tab
+- **Tenant Name**: Your organization's tenant name (e.g., `pawsomepets`)
+
+### 3. Configure Required Scopes
+
+Ensure your Asgardeo application has the following scopes enabled:
+- `openid` - Standard OpenID Connect scope
+- `email` - User email address access
+- `profile` - User profile information
+- `internal_login` - Required for user authentication
+
+### 4. Update Environment Variables
 
 Replace the placeholders in your `.env` file:
 - Replace `<your-tenant>` with your actual Asgardeo tenant name
-- Replace `<your-client-id>` with your actual OAuth2 client ID from Asgardeo
+- Replace `<your-client-id>` with your OAuth2 client ID from Asgardeo
 
-**Security Note**: Never commit your `.env` file to version control. Add `.env` to your `.gitignore` file to keep your credentials secure.
+**Security Note**: Never commit your `.env` file to version control. Add `.env` to your `.gitignore` file.
 
-## Running the Server
+## Architecture Overview
 
-### Development Mode
+### MCP Server (`main.py`)
 
-1. **Start the server**
-   ```bash
-   python main.py
-   ```
+The MCP server provides secured tools for pet management:
 
-2. **Server will start on**: `http://localhost:8000` using `streamable-http` transport
+1. **JWT Token Verification**
+   - Validates incoming tokens using Asgardeo JWKS endpoint
+   - Extracts user claims (subject, scopes, audience)
+   - Implements RFC 9728 Protected Resource Metadata
 
+2. **Available Tools**:
+   - `get_user_id_by_email` - Retrieves user ID from email
+   - `get_pets_by_user_id` - Lists all pets for a user
+   - `get_pet_vaccination_info` - Fetches vaccination history
+   - `book_vet_appointment` - Books veterinary appointments
+   - `cancel_appointment` - Cancels existing appointments
+   - `suggest_pet_names` - AI-powered pet name suggestions via OpenAI
 
-## Test with MCP Inspector
+### LangGraph Agent (`agent.py`)
+
+The agent orchestrates intelligent conversations with dynamic context management:
+
+1. **Authentication Flow**
+   - Implements OAuth2 Authorization Code Flow with PKCE
+   - Automatically opens browser for Asgardeo login
+   - Retrieves user email from ID token and SCIM2/Me endpoint
+   - Exchanges authorization code for access token
+
+2. **State Management**
+   - Maintains conversation history per session
+   - Caches user context (user ID, pets, active pet)
+   - Dynamically resolves pet context from user messages
+
+3. **Graph Nodes**:
+   - `load_context` - Loads user data at conversation start
+   - `classify` - Determines user intent
+   - `mcp_agent` - Executes MCP tool calls with dynamic context
+   - `greeting`, `services`, `pricing`, `general` - Intent-specific handlers
+
+4. **Multi-Pet Logic**:
+   - Single pet: Automatic context selection
+   - Multiple pets: Detects pet names in messages or asks for clarification
+   - No pets: Informs user appropriately
+
+## Running the System
+
+### 1. Start the MCP Server
+
+```bash
+python main.py
+```
+
+The server will start on `http://localhost:8000` using `streamable-http` transport.
+
+### 2. Start the Agent Server
+
+```bash
+python agent.py
+```
+
+The agent will:
+1. Open your browser for Asgardeo authentication
+2. Wait for authorization callback
+3. Retrieve your user email
+4. Start the chat server on `http://localhost:8080`
+
+### 3. Access the Web Interface
+
+Open `http://localhost:8080` in your browser to interact with the chatbot.
+
+## Testing with MCP Inspector
 
 ### Setup MCP Inspector
-Run latest MCP Inspector UI with below command:
+
+1. **Install and run MCP Inspector**:
    ```bash
    npx @modelcontextprotocol/inspector
    ```
-For more information on how to run MCP Inspector, refer to the [MCP Inspector documentation](https://github.com/modelcontextprotocol/inspector?tab=readme-ov-file#mcp-inspector)
-
-**Note**: Make sure to get the Inspector release `0.16.3` or higher version.
    
-### Setup the MCP Inspector to connect with the server
-1. Once the mcp inspector got started, it will shows the URL where it is running, usually `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<Proxy_Token>`.
-2. Configure Inspector's callback URL in your Asgardeo application settings:
-   - Go to your Asgardeo application settings (You have created this in the previous steps).
-   - Navigate to **Protocol** tab
-   - Add the callback URL: `http://localhost:6274/oauth/callback` (Port can be changed, make sure to match the port where MCP Inspector is running).
-   - Update the application.
-3. Open the MCP Inspector in your browser using the URL provided by the MCP Inspector server, e.g., `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<Proxy_Token>`.
-4. Configure this sample mcp server as shown in below image:
-![mcp-auth-configs.png](images/mcp-auth-configs.png)
-5. Click on the **Connect** button to establish a connection with the MCP server.
-   (Once you click on the connect button, it will redirect you to the Asgardeo login page, where you can login with your Asgardeo credentials.)
-![mcp-server-connect.png](images/mcp-server-connect.png)
-6. Once connected, you can start testing the available get_weather tool by navigating the **Tools** tab in the MCP Inspector.
+   **Note**: Ensure version `0.16.3` or higher.
 
-## Available Tools
+2. **Configure Inspector Callback**:
+   - Add `http://localhost:6274/oauth/callback` to your Asgardeo application's authorized redirect URLs
 
-### get_weather Tool
+3. **Connect to MCP Server**:
+   - Open the Inspector URL (e.g., `http://localhost:6274/?MCP_PROXY_AUTH_TOKEN=<token>`)
+   - Configure the server connection:
+     - **Transport**: HTTP SSE
+     - **URL**: `http://localhost:8000/mcp`
+     - **Auth**: OAuth2 with Asgardeo settings
 
-- **Description**: Get weather data for a city
-- **Parameters**: 
-  - `city` (optional): City name (defaults to "London")
-- **Authentication**: Required (valid JWT token)
-- **Returns**: Weather information including temperature, condition, and humidity
+   ![MCP Auth Configs](images/mcp-auth-configs.png)
 
+4. **Test Authentication**:
+   - Click **Connect**
+   - You'll be redirected to Asgardeo for login
+   - After successful authentication, you can test the tools
+
+   ![MCP Server Connect](images/mcp-server-connect.png)
+
+## Sample Conversation Flows
+
+### Example 1: Single Pet User
+```
+User: Hi!
+Agent: Welcome back! I've loaded your pet details. How can I help?
+
+User: What are Buddy's vaccinations?
+Agent: [Automatically calls get_pet_vaccination_info with Buddy's ID]
+       Buddy's vaccination records show:
+       - Rabies (Jan 15, 2024) - Next due: Jan 15, 2025
+       - DHPP (Mar 20, 2024) - Next due: Mar 20, 2025
+       - Bordetella (Jun 10, 2024) - Upcoming: Dec 10, 2024
+```
+
+### Example 2: Multiple Pet User
+```
+User: Show me vaccination info
+Agent: Which pet are you referring to? You have:
+       - Buddy (Dog)
+       - Spot (Dog)
+
+User: Buddy
+Agent: [Calls get_pet_vaccination_info with Buddy's ID]
+       [Returns vaccination details...]
+```
+
+### Example 3: Booking Appointment
+```
+User: Book an appointment for Buddy next Monday at 2 PM for checkup
+Agent: [Calls book_vet_appointment]
+       Appointment confirmed!
+       - Pet: Buddy
+       - Date: 2025-11-24
+       - Time: 2:00 PM
+       - Reason: Checkup
+       - Veterinarian: Dr. Smith
+```
+
+## Security Features
+
+1. **JWT Token Validation**
+   - Validates tokens against Asgardeo JWKS endpoint
+   - Verifies issuer, audience, and expiration
+   - Extracts and validates scopes
+
+2. **Authorization Flow**
+   - OAuth2 Authorization Code Flow with PKCE
+   - Secure token exchange
+   - No client secret required (PKCE protects public clients)
+
+3. **Scope-Based Access Control**
+   - Tools require valid access tokens
+   - Future enhancement: Scope-specific tool access
+
+4. **User Context Isolation**
+   - Each user sees only their own pets
+   - Session-based conversation memory
+   - Context caching per session ID
+
+## Troubleshooting
+
+### Email Not Retrieved from ID Token
+
+The agent includes fallback logic to retrieve email from SCIM2/Me endpoint if not present in ID token:
+
+```python
+# Fallback to SCIM2/Me endpoint
+scim_url = f"{base_url}/scim2/Me"
+scim_resp = await client.get(
+    scim_url,
+    headers={"Authorization": f"Bearer {access_token}"}
+)
+```
+
+### Token Validation Failures
+
+Check the following:
+- JWKS URL is correct and accessible
+- Issuer URL matches exactly (including tenant)
+- Client ID is correct
+- Token has not expired
+
+### Connection Issues
+
+- Ensure MCP server is running on `http://localhost:8000`
+- Verify agent server is running on `http://localhost:8080`
+- Check firewall settings for local ports
+
+## Advanced Configuration
+
+### Custom Port Configuration
+
+Modify port settings in the respective files:
+
+**MCP Server** (`main.py`):
+```python
+mcp.run(transport="streamable-http", port=8000)
+```
+
+**Agent Server** (`agent.py`):
+```python
+site = web.TCPSite(runner, 'localhost', 8080)
+```
+
+### Adding New Tools
+
+To add new MCP tools:
+
+1. Define the tool in `main.py`:
+```python
+@mcp.tool()
+async def my_new_tool(param: str) -> dict:
+    """Tool description"""
+    # Implementation
+    return {"result": "data"}
+```
+
+2. The agent will automatically discover and use the new tool.
+
+## Contributing
+
+Contributions are welcome! Please ensure:
+- Code follows PEP 8 style guidelines
+- All new tools include proper authentication checks
+- Documentation is updated for new features
+
+## License
+
+This project is provided as-is for demonstration purposes.
+
+---
+
+**Powered by Asgardeo** - Enterprise-grade identity and access management for modern applications.
